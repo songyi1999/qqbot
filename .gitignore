@@ -1,0 +1,17 @@
+# Ignore Python bytecode
+*.pyc
+*.pyo
+__pycache__/
+
+# Ignore VS Code metadata
+.vscode/
+
+# Ignore Jupyter notebook outputs and cached outputs
+.ipynb_checkpoints/
+*.log
+.env
+
+image.jpg
+database.db
+
+test.py

@@ -1,0 +1,44 @@
+.vscode/
+.rpt2_cache/
+demos/
+scripts/
+src/
+coverage/
+node_modules/
+karma.conf.js
+*.tgz
+dist/**/*.js.map
+.travis.yml
+.npmignore
+tslint.json
+yarn.lock
+examples/
+_art/
+yarn-error.log
+bundle.js
+.DS_Store
+.all-contributorsrc
+.editorconfig
+.gitignore
+bundle-model.mjs
+jest.config.js
+tsconfig.cjs.json
+tsconfig.esm.json
+tsconfig.json
+.circleci/
+.github/
+__tests__/
+
+# Models
+/models/
+
+# Ignore intermediate browserify files
+# Mountpoint
+dist/cjs/nsfwjs.d.ts
+dist/cjs/nsfwjs.js
+dist/esm/nsfwjs.d.ts
+dist/esm/nsfwjs.js
+# Unminified bundle
+dist/browser/bundle.js
+
+netlify.toml

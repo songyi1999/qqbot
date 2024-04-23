@@ -1,0 +1,15 @@
+{
+    "apps": [{
+      "name": "nsfwjs",
+      "script": "/home/ubuntu/.nvm/versions/node/v20.12.0/bin/node app.js",
+      "cwd": "/home/ubuntu/langchainjstest/nsfwjs/",
+      "exec_mode": "fork",
+      "max_memory_restart": "1G",
+      "autorestart": true,
+      "node_args": [],
+      "args": [],
+      "env": {
+        
+      }
+    }]
+  }

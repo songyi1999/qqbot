@@ -1,0 +1,17 @@
+node_modules/
+dist/
+yarn-error.log
+.vscode
+.DS_Store
+
+examples/manual-testing/data/*
+!examples/manual-testing/data/index.html
+!examples/manual-testing/data/animations/
+!examples/manual-testing/data/images/
+!examples/manual-testing/data/videos/
+
+/models/**/*.js
+/models/**/*.min.js
+
+# Local Netlify folder
+.netlify

@@ -32,6 +32,9 @@
     ```shell
     cd  nsfwjs
     npm install
+    npm run build
+    npm install -g pm2
+    pm2 start pm2.json
     ```
 3. 设置环境变量
 

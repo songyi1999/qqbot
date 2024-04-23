@@ -1,4 +1,4 @@
 langchain
-langchain_openai
+langchain-openai
 python-dotenv
 botpy

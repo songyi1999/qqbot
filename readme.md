@@ -44,3 +44,9 @@
 修改对应设置
 
 
+
+4. 安装ollama 
+```
+curl -fsSL https://ollama.com/install.sh | sh
+ollama pull qwen:0.5b
+```

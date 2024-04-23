@@ -12,3 +12,32 @@
 - [ ] 语音合成
 
 
+# 使用方法
+
+1. 安装依赖
+
+运行 ：
+    
+    ```shell
+    pip install -r requirements.txt
+    ```
+
+2. 安装附加鉴黄依赖(可选)
+
+运行 ：
+    
+    ```shell
+    cd  nsfwjs
+    npm install
+    ```
+3. 设置环境变量
+
+新建一个.env 文件
+    
+        ```shell
+        cp .env.example .env
+    
+        ```
+修改对应设置
+
+

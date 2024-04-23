@@ -20,7 +20,10 @@
     
     ```shell
     pip install -r requirements.txt
+    cd botpy 
+    pip install -e .
     ```
+
 
 2. 安装附加鉴黄依赖(可选)
 

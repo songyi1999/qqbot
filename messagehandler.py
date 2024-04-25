@@ -20,7 +20,7 @@ from typing import Union
 
 
 dotenv.load_dotenv()
-model= ChatOpenAI(model_name="qwen7b") 
+model= ChatOpenAI() 
 
 localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
     openai_api_key="no",

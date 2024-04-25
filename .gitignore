@@ -10,7 +10,7 @@ __pycache__/
 .ipynb_checkpoints/
 *.log
 .env
-
+botpy.log*
 image.jpg
 database.db
 

@@ -17,7 +17,7 @@ def nsfw():
     encoder = MultipartEncoder(
         {'image': (os.path.basename(image_file), open(image_file, 'rb'))})
     headers = {'Content-Type': encoder.content_type}
-    response = requests.post('http://127.0.0.1:8080/nsfw', headers=headers, data=encoder)
+    response = requests.post('http://49.235.191.145:8080/nsfw', headers=headers, data=encoder)
     classe= response.json()
     print(classe)
     # 只有netural 和drawing 两个类别是安全的

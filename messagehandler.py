@@ -20,7 +20,11 @@ from typing import Union
 
 
 dotenv.load_dotenv()
-model= ChatOpenAI() 
+
+
+model= ChatOpenAI(
+    model_name=os.getenv("model_name","gpt-3.5-turbo")
+) 
 
 localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
     openai_api_key="no",
@@ -28,8 +32,11 @@ localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
 )
 
 
-
+# 主要的llm
 llm =model.with_fallbacks([localmodel])|StrOutputParser()
+
+
+lowllm= localmodel|StrOutputParser()
 
 # 普通聊天
 
@@ -90,7 +97,7 @@ draw_prompt = PromptTemplate.from_template("""
 
 
 
-drawchain={"text": RunnablePassthrough()}| draw_prompt|llm|StrOutputParser()
+drawchain={"text": RunnablePassthrough()}| draw_prompt|lowllm|StrOutputParser()
 
 
 
@@ -192,7 +199,7 @@ def  get_json( input:str)->str:
 
 weather_data = {"input": RunnablePassthrough()} | weather_prompt | llm | get_json  |get_weather 
 
-weather_chain = {"input": weather_data, "question": RunnablePassthrough() }|show_prompt|llm|StrOutputParser()
+weather_chain = {"input": weather_data, "question": RunnablePassthrough() }|show_prompt|lowllm|StrOutputParser()
 
 
 

@@ -26,6 +26,30 @@ model= ChatOpenAI(
     model_name=os.getenv("model_name","gpt-3.5-turbo")
 ) 
 
+# groq 的 llama3-70b-8192 模型
+groqmodel=ChatOpenAI(
+    model_name="llama3-70b-8192",
+    openai_api_key=os.getenv("GROQ_API_KEY"),
+    openai_api_base=os.getenv("GROQ_API_BASE")
+)
+# llama3 需要套本地模型作为翻译
+
+# 英文翻译成中文
+prompt_en_to_cn = PromptTemplate.from_template("""
+    你是一个中英文翻译专家，将用户输入的英文翻译成中文。对于非中文内容，它将提供中文翻译结果。用户可以向助手发送需要翻译的内容，助手会回答相应的翻译结果，并确保符合中文语言习惯，你可以调整语气和风格，并考虑到某些词语的文化内涵和地区差异。同时作为翻译家，需将原文翻译成具有信达雅标准的译文。"信" 即忠实于原文的内容与意图；"达" 意味着译文应通顺易懂，表达清晰；"雅" 则追求译文的文化审美和语言的优美。目标是创作出既忠于原作精神，又符合目标语言文化和读者审美的翻译。
+            以下是用户的描述，如果内容包含英文， 请重新用中文描述这段内容。如果全部为中文，请直接输出原文内容。
+    
+            {text}
+    """)
+en_to_cn = {"text": RunnablePassthrough()} | prompt_en_to_cn | groqmodel | StrOutputParser()
+
+
+
+
+
+
+
+
 localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
     openai_api_key="no",
     openai_api_base="http://127.0.0.1:11434/v1"
@@ -33,10 +57,17 @@ localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
 
 
 # 主要的llm
-llm =model.with_fallbacks([localmodel])|StrOutputParser()
+# llm =model.with_fallbacks([localmodel])|StrOutputParser()
+llm = groqmodel|StrOutputParser()
 
 
-lowllm= localmodel|StrOutputParser()
+# 次要的llm 做些简单工作节省资源
+low_llm= ChatOpenAI(
+    model_name=os.getenv("low_model_name","gpt-3.5-turbo")
+) 
+
+
+lowllm= low_llm.with_fallbacks([localmodel])|StrOutputParser()
 
 # 普通聊天
 
@@ -81,7 +112,9 @@ def  build_message(input):
     return {"messages": messages,"memory":memory}
 
 
-chatchain= build_message|prompt|llm
+# chatchain= build_message|prompt|llm 
+chatchain= build_message|prompt|llm |en_to_cn
+
 
 
 

@@ -3,7 +3,7 @@ import os,re, dotenv,botpy
 from botpy.message import Message,DirectMessage,GroupMessage
 from botpy.manage import GroupManageEvent
 dotenv.load_dotenv()
-from  messagehandler import  chatchain,drawchain,memary_chain,weather_chain
+from  messagehandler import  chatchain,drawchain,memary_chain,weather_chain,intent
 from urllib.parse import quote
 import  requests,json
 from  db_helper import dbManager
@@ -52,9 +52,9 @@ class MyClient(botpy.Client):
         db= dbManager(member_openid)
         addtime = int(time.time())
         db.add(addtime,question,'user')
-
+        intent_result= intent.invoke(question)
         
-        if "画" in question:
+        if "draw" in question:
           # 回复图片        
             # 上传文件
             
@@ -94,7 +94,7 @@ class MyClient(botpy.Client):
                 msg_id=message.id,
                 content=content)
                 return 
-        if "记住" in question:
+        if "remember" in question:
             content= memary_chain.invoke({"question":question,"member_openid":member_openid})
             await message._api.post_group_message(
                 group_openid=message.group_openid,
@@ -106,7 +106,7 @@ class MyClient(botpy.Client):
             db.close()
             return 
 
-        if "天气" in question or "气温" in question:
+        if "weather" in question :
 
             content = weather_chain.invoke(question)
 

@@ -54,7 +54,7 @@ class MyClient(botpy.Client):
         db.add(addtime,question,'user')
         intent_result= intent.invoke(question)
         
-        if "draw" in question:
+        if "draw" in intent_result:
           # 回复图片        
             # 上传文件
             
@@ -94,7 +94,7 @@ class MyClient(botpy.Client):
                 msg_id=message.id,
                 content=content)
                 return 
-        if "remember" in question:
+        if "remember" in intent_result:
             content= memary_chain.invoke({"question":question,"member_openid":member_openid})
             await message._api.post_group_message(
                 group_openid=message.group_openid,
@@ -106,7 +106,7 @@ class MyClient(botpy.Client):
             db.close()
             return 
 
-        if "weather" in question :
+        if "weather" in intent_result :
 
             content = weather_chain.invoke(question)
 

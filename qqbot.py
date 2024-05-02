@@ -9,6 +9,7 @@ import  requests,json
 from  db_helper import dbManager
 import time 
 from  nsfw_filter import   nsfw
+from upload import  showcode,start_upload
 # 消息处理
 
 # 去掉消息发送人的@，只保留问题内容
@@ -53,7 +54,21 @@ class MyClient(botpy.Client):
         addtime = int(time.time())
         db.add(addtime,question,'user')
         intent_result= intent.invoke(question)
-        
+        if "file" in intent_result:
+            image_url=showcode(member_openid) 
+            uploadMedia = await message._api.post_group_file(
+                    group_openid=message.group_openid, 
+                    file_type=1, # 文件类型要对应上，具体支持的类型见方法说明
+                    url= image_url
+                )
+            await message._api.post_group_message(
+                    group_openid=message.group_openid,
+                    msg_type=7,  # 7表示富媒体类型
+                    msg_id=message.id, 
+                    media=uploadMedia
+                )
+            return 
+
         if "draw" in intent_result:
           # 回复图片        
             # 上传文件
@@ -146,6 +161,43 @@ class MyClient(botpy.Client):
         content= message_handler(message.content,member_openid)
         await self.api.post_message(channel_id=message.channel_id, content=content)
 
-intents = botpy.Intents(direct_message=True,public_guild_messages=True,public_messages=True) 
-client = MyClient(intents=intents)
-client.run(appid=os.getenv("QQ_APP_ID")  ,secret=os.getenv("QQ_APP_SECRET"))
+
+
+def start_qqbot():
+    intents = botpy.Intents(direct_message=True,public_guild_messages=True,public_messages=True) 
+    client = MyClient(intents=intents)
+    client.run(appid=os.getenv("QQ_APP_ID")  ,secret=os.getenv("QQ_APP_SECRET"))
+
+from multiprocessing import Process
+
+def main():
+    try:
+        # 创建进程
+        qqbot_process = Process(target=start_qqbot)
+        upload_process = Process(target=start_upload)
+        
+        # 启动进程
+        qqbot_process.start()
+        upload_process.start()
+        
+        # 等待进程完成
+        qqbot_process.join()
+        upload_process.join()
+
+        print("所有任务完成")
+
+    except Exception as e:
+        print(f"发生错误：{e}")
+        
+    finally:
+        try:
+            # 清理进程，避免资源泄露
+            qqbot_process.terminate()
+            upload_process.terminate()
+        except Exception as e:
+            print(f"清理进程时出现错误：{e}")
+
+if __name__ == "__main__":
+    main()
+
+    

@@ -1,3 +1,7 @@
 langchain
 langchain-openai
 python-dotenv
+qrcode
+fastapi
+uvicorn
+python-multipart

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>上传文件</title>
+</head>
+<body>
+    <h1>上传文件</h1>
+    <span>支持docx,xlsx,txt,pdf 格式</span>
+        <input type="file" name="file" id="file" accept=".docx,.xlsx,.txt,.pdf">
+        <button id="upload">上传</button>
+    <script>
+let  member_openid= location.search.split('=')[1];
+let file = document.getElementById('file');
+let upload = document.getElementById('upload');
+
+
+
+upload.onclick = function(){
+    let formData = new FormData();
+    formData.append('file',file.files[0]);
+    formData.append('member_openid',member_openid);
+    if (!/^.*\.(docx|xlsx|txt|pdf)$/i.test(file.value)) {
+                alert("请选择正确的文件格式");
+                return;
+            }
+    let xhr = new XMLHttpRequest();
+    xhr.open('post','/uploadfile',true);
+    xhr.send(formData);
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState == 4 && xhr.status == 200){
+            console.log(xhr.responseText);
+            alert('上传成功');
+            window.close();
+        }
+    }
+}
+
+
+
+</script>
+
+
+</body>
+</html>

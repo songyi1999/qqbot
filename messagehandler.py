@@ -17,7 +17,7 @@ from langchain_core.tools import tool
 import json
 from langchain.tools.render import render_text_description
 from typing import Union
-
+from toolsuse import * 
 
 dotenv.load_dotenv()
 
@@ -32,6 +32,22 @@ groqmodel=ChatOpenAI(
     openai_api_key=os.getenv("GROQ_API_KEY"),
     openai_api_base=os.getenv("GROQ_API_BASE")
 )
+
+
+localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
+    openai_api_key="no",
+    openai_api_base="http://127.0.0.1:11434/v1"
+)
+
+
+
+
+
+low_llm= ChatOpenAI(
+    model_name=os.getenv("low_model_name","gpt-3.5-turbo")
+) 
+
+
 # llama3 需要套本地模型作为翻译
 
 # 英文翻译成中文
@@ -50,22 +66,11 @@ en_to_cn = {"text": RunnablePassthrough()} | prompt_en_to_cn | groqmodel | StrOu
 
 
 
-localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
-    openai_api_key="no",
-    openai_api_base="http://127.0.0.1:11434/v1"
-)
-
-
 # 主要的llm
 # llm =model.with_fallbacks([localmodel])|StrOutputParser()
 llm = groqmodel|StrOutputParser()
 
-
 # 次要的llm 做些简单工作节省资源
-low_llm= ChatOpenAI(
-    model_name=os.getenv("low_model_name","gpt-3.5-turbo")
-) 
-
 
 lowllm= low_llm.with_fallbacks([localmodel])|StrOutputParser()
 
@@ -76,6 +81,7 @@ intent_prompt = PromptTemplate.from_template("""
         draw: 用户明确说明想要AI绘画创作,用户描述的内容是包含具体想画什么的描述。例如：“请给我画一只猫” 或“我想要一幅美丽的名山大川的图”。
         weather: 需要查询天气请况。例如：“今天苏州会下雨吗？” 或 “今天需要带伞吗？”,“今天的紫外线指数是多少？”
         remember: 用户想要保存一些信息。通常会包含“记住” 这个词或同类词。例如：“请记住我喜欢吃苹果” 或 “记住我喜欢看电影” 或 “记住，你的名字叫猫局”
+        file:用户想要上传文件.
         other: 其他。任何不包含在以上类别的对话，都选择other类别。
 
         以下是用户的描述，严谨的请判断用户的意图，并只返回类别标签。不用输出其他内容。
@@ -84,7 +90,7 @@ intent_prompt = PromptTemplate.from_template("""
 """)
 @chain
 def intent(input):
-    return {"text": RunnablePassthrough()}|intent_prompt|low_llm|StrOutputParser()
+    return {"text": RunnablePassthrough()}|intent_prompt|groqmodel|StrOutputParser()
 
 
 
@@ -95,21 +101,33 @@ def intent(input):
 
 # 普通聊天
 
+
+
+
+
+
+
 prompt = ChatPromptTemplate.from_messages(
     [
         (
             "system",
             """这是属于你的长期记忆，请从长期记忆中提取信息，然后回答问题。
 
-
+                ***********记忆开始***********
                 {memory}
+                ***********记忆结束***********
+
+                这是针对用户的问题进行了网络搜索，请参考搜索结果回答问题。
+                ***********搜索结果开始***********
+                {search_data}
+                ***********搜索结果结束***********
+
              """
         ),
         
         MessagesPlaceholder(variable_name="messages"),
     ]
 )
-
 @chain
 def  build_message(input):
     member_openid = input.get("member_openid")
@@ -133,11 +151,13 @@ def  build_message(input):
             messages.append(HumanMessage(content))
         else:
             messages.append(AIMessage(content))
-    return {"messages": messages,"memory":memory}
+    searchresult= search.invoke(question)
+    return {"messages": messages,"memory":memory,"search_data":searchresult}
 
 
 # chatchain= build_message|prompt|llm 
-chatchain= build_message|prompt|llm |en_to_cn
+
+chatchain = build_message|prompt|llm|en_to_cn
 
 
 
@@ -184,75 +204,6 @@ memary_chain = save_memory
 
 
 # 天气预报
-# https://wttr.in/Shanghai?format=j1
-@tool
-def get_weather(city )->dict:
-    """  the  input type is String  city english name, return weather info, if city is not provided, set the default city name  to  'Shanghai' use english name. """
-    #if the city is not provided, set the default city name to 'Shanghai'
-   
-    url = f"https://wttr.in/{city}?format=j1"
-    loader = WebBaseLoader(url)
-    doc= loader.load()
-    weatherjson= json.loads(doc[0].page_content)
-    if weatherjson.get("output") is None:
-        return weatherjson.get("current_condition")[0]
-    else :
-        return  weatherjson.get("output").get("current_condition")[0]
-
-rendered_tools = render_text_description([get_weather])
-
-system_prompt = f"""
-    You are an assistant that has access to the following set of tools. Here are the names and descriptions for each tool:
-
-{rendered_tools}
-
-Given the user input, return the name and input of the tool to use. Return your response as a JSON blob with 'name' and 'arguments' keys."""
-
-weather_prompt = ChatPromptTemplate.from_messages(
-    [("system", system_prompt), ("user", "{input}")]
-)
-
-
-show_prompt= ChatPromptTemplate.from_template("""
-    你是一个天气助手，通过分析以下的json数据，用简洁中文告诉用户天气情况。
-
-    以下为 json 数据：
-
-    {input}
-
-
-
-
-    以下为用户问题：
-    {question}
-
-
-
-
-
-
-""")
-
-
-
-# 正则表达式获取json
-@chain
-def  get_json( input:str)->str:
-    import re
-    pattern = re.compile(r'\{[^`]*\}')
-    match = pattern.search(input)
-    citydic= { "city":"Shanghai" }
-    if match:
-
-        cityjsonstr= match.group(0)
-        cityjson = json.loads(cityjsonstr)
-        city = cityjson.get("arguments")
-        # 如果不是字符串 ，获取第一个元素
-        if not isinstance(city,str):
-            city = city[0]
-        citydic["city"] = city
-    return citydic
-
 
 weather_data = {"input": RunnablePassthrough()} | weather_prompt | llm | get_json  |get_weather 
 

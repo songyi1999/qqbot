@@ -34,7 +34,12 @@ class FaissVectorManager:
     def add(self, text):
         self.faiss.add_documents(  [Document(page_content=text),] )
         self.save()
-
+    def add_texts(self, texts):
+        self.faiss.add_documents(  [Document(page_content=text) for text in texts] )
+        self.save()
+    def add_documents(self, documents):
+        self.faiss.add_documents(documents)
+        self.save()
 
     def search(self, text, top_k=5):
         return self.faiss.similarity_search_with_score(text, top_k)

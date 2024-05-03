@@ -8,7 +8,7 @@
 <body>
     <h1>上传文件</h1>
     <span>支持docx,xlsx,txt,pdf 格式</span>
-        <input type="file" name="file" id="file" accept=".docx,.xlsx,.txt,.pdf">
+        <input type="file" name="file" id="file" accept=".docx,.xlsx,.txt,.pdf,.csv">
         <button id="upload">上传</button>
     <script>
 let  member_openid= location.search.split('=')[1];
@@ -21,7 +21,7 @@ upload.onclick = function(){
     let formData = new FormData();
     formData.append('file',file.files[0]);
     formData.append('member_openid',member_openid);
-    if (!/^.*\.(docx|xlsx|txt|pdf)$/i.test(file.value)) {
+    if (!/^.*\.(docx|xlsx|txt|pdf|csv)$/i.test(file.value)) {
                 alert("请选择正确的文件格式");
                 return;
             }

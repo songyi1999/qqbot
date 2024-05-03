@@ -15,5 +15,10 @@ image.jpg
 database.db
 
 test.py
+test.txt
+test.*
+
+faiss/*
+files/*
 
 nohup.out

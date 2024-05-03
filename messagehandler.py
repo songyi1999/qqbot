@@ -18,6 +18,7 @@ import json
 from langchain.tools.render import render_text_description
 from typing import Union
 from toolsuse import * 
+from faiss_helper import *
 
 dotenv.load_dotenv()
 
@@ -122,6 +123,11 @@ prompt = ChatPromptTemplate.from_messages(
                 {search_data}
                 ***********搜索结果结束***********
 
+                这是进行了知识库搜索，请参考搜索结果回答问题。
+                ***********知识库搜索结果开始***********
+                {content}
+                ***********知识库搜索结果结束***********
+
              """
         ),
         
@@ -152,7 +158,11 @@ def  build_message(input):
         else:
             messages.append(AIMessage(content))
     searchresult= search.invoke(question)
-    return {"messages": messages,"memory":memory,"search_data":searchresult}
+    vector= FaissVectorManager(member_openid)
+    vector_result=vector.search(question)
+    content=vector_result[0][0]
+
+    return {"content":content,"messages": messages,"memory":memory,"search_data":searchresult}
 
 
 # chatchain= build_message|prompt|llm 

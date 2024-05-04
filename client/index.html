@@ -4,12 +4,26 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>上传文件</title>
+    <style>
+        #uploading{
+            display: none;
+        }
+        #file {
+            display: block;
+            background: #1db110;
+            padding: 10px;
+            color: #fff;
+            border-radius: 5px;
+            margin: 10px auto;
+        }
+    </style>
 </head>
 <body>
     <h1>上传文件</h1>
     <span>支持docx,xlsx,txt,pdf 格式</span>
-        <input type="file" name="file" id="file" accept=".docx,.xlsx,.txt,.pdf,.csv">
+        <input type="file" name="file" id="file">
         <button id="upload">上传</button>
+        <span id="uploading">正在上传中，请稍后</span>
     <script>
 let  member_openid= location.search.split('=')[1];
 let file = document.getElementById('file');
@@ -22,9 +36,11 @@ upload.onclick = function(){
     formData.append('file',file.files[0]);
     formData.append('member_openid',member_openid);
     if (!/^.*\.(docx|xlsx|txt|pdf|csv)$/i.test(file.value)) {
-                alert("请选择正确的文件格式");
+                alert("请选择正确的文件格式");  
                 return;
             }
+    document.getElementById('upload').style.display = 'none';
+    document.getElementById('uploading').style.display = 'block';
     let xhr = new XMLHttpRequest();
     xhr.open('post','/uploadfile',true);
     xhr.send(formData);
@@ -32,6 +48,8 @@ upload.onclick = function(){
         if(xhr.readyState == 4 && xhr.status == 200){
             console.log(xhr.responseText);
             alert('上传成功');
+            document.getElementById('upload').style.display = 'block';
+            document.getElementById('uploading').style.display = 'none';
             window.close();
         }
     }

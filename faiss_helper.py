@@ -51,7 +51,7 @@ class FaissVectorManager:
 
 def main():
     manager = FaissVectorManager('123')
-    # manager.add('记住，你叫猫局')
+    manager.add('记住，你叫猫局')
     
     testresult = manager.search('记住，你叫猫？')
     for i in testresult:

@@ -160,7 +160,9 @@ def  build_message(input):
     searchresult= search.invoke(question)
     vector= FaissVectorManager(member_openid)
     vector_result=vector.search(question)
-    content=vector_result[0][0]
+    content=""
+    for i in vector_result:
+        content += i[0].page_content + "\n"
 
     return {"content":content,"messages": messages,"memory":memory,"search_data":searchresult}
 

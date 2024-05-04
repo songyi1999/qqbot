@@ -6,3 +6,6 @@ fastapi
 uvicorn
 python-multipart
 bs4
+langchain_cohere
+pypdf
+unstructured

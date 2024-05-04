@@ -1,5 +1,5 @@
 import qrcode
-import json
+import json,dotenv
 from fastapi import FastAPI,Body,UploadFile,Request,File,Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.websockets import WebSocket
@@ -9,6 +9,8 @@ import uvicorn
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import TextLoader,Docx2txtLoader,PyPDFLoader,UnstructuredExcelLoader,CSVLoader
 import os
+dotenv.load_dotenv()
+
 from fastapi.responses import FileResponse
 from faiss_helper import FaissVectorManager,embeddings
 def  showcode(member_openid):
@@ -91,15 +93,24 @@ def start_upload():
 
 if __name__ == '__main__':
     from messagehandler import  lowllm
-    docx= './test.txt'
-    loader=TextLoader(docx)
-    docs=loader.load()
-    text_splitter= RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    splits = text_splitter.split_documents(docs)
-    db = FaissVectorManager('123')
-    db.add_documents(splits)
-    question= "一共有多少人？"
+    from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
+    from langchain_cohere import CohereRerank
+    # docx= './test.txt'
+    # loader=TextLoader(docx)
+    # docs=loader.load()
+    # text_splitter= RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
+    # splits = text_splitter.split_documents(docs)
+    db = FaissVectorManager('5199C654EC2E4CA459BF88666D1710E6')
+   
+
+   
+
+
+
+    # db.add_documents(splits)
+    question= "张三考多少分？"
     testresult = db.search(question)
+    print(testresult)
     resulttext=testresult[0][0].page_content
     print(resulttext)
     prompt = f""" 请参考以下内容回答问题：
@@ -111,4 +122,6 @@ if __name__ == '__main__':
     """
     for i in lowllm.stream(prompt):
         print(i,end="",flush=True)
+    
+   
 

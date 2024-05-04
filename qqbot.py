@@ -78,6 +78,7 @@ class MyClient(botpy.Client):
             image_url= quote(imagestr)
             image_url = image_url.replace(".", "")
             file_url = "https://image.pollinations.ai/prompt/" + image_url 
+            print(file_url)
             file_url= "https://jscn.sz-hgy.com/proxy.php?url="+file_url
             # 上传资源
             requests.get(file_url)

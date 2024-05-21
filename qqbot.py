@@ -134,10 +134,10 @@ class MyClient(botpy.Client):
         else:
 
             content= message_handler(question,member_openid)
-            # 回复消息
+          
             await message._api.post_group_message(
                 group_openid=message.group_openid,
-                msg_type=0, 
+                msg_type=0  , 
                 msg_id=message.id,
                 content=content)
             addtime = int(time.time())

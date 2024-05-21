@@ -92,36 +92,7 @@ def start_upload():
 
 
 if __name__ == '__main__':
-    from messagehandler import  lowllm
-    from langchain.retrievers.contextual_compression import ContextualCompressionRetriever
-    from langchain_cohere import CohereRerank
-    # docx= './test.txt'
-    # loader=TextLoader(docx)
-    # docs=loader.load()
-    # text_splitter= RecursiveCharacterTextSplitter(chunk_size=1000, chunk_overlap=200)
-    # splits = text_splitter.split_documents(docs)
-    db = FaissVectorManager('5199C654EC2E4CA459BF88666D1710E6')
-   
-
-   
-
-
-
-    # db.add_documents(splits)
-    question= "张三考多少分？"
-    testresult = db.search(question)
-    print(testresult)
-    resulttext=testresult[0][0].page_content
-    print(resulttext)
-    prompt = f""" 请参考以下内容回答问题：
-    内容如下：
-    {resulttext}
-    
-    问题如下：
-    {question}
-    """
-    for i in lowllm.stream(prompt):
-        print(i,end="",flush=True)
+     start_upload()
     
    
 

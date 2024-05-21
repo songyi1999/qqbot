@@ -91,7 +91,10 @@ def search(question:str)->str:
     """  the  input type is String  question, return search result. """
     url = f"http://yifus.win:3000/search?query={question}"
     print(url)
-    loader = WebBaseLoader(url)
-    doc= loader.load()
-    return doc[0].page_content
-
+    try:
+        loader = WebBaseLoader(url)
+        doc= loader.load()
+        return doc[0].page_content
+    except Exception as e:
+        return ''
+    

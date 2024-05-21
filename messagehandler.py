@@ -28,11 +28,16 @@ model= ChatOpenAI(
 ) 
 
 # groq 的 llama3-70b-8192 模型
-groqmodel=ChatOpenAI(
-    model_name="llama3-70b-8192",
-    openai_api_key=os.getenv("GROQ_API_KEY"),
-    openai_api_base=os.getenv("GROQ_API_BASE")
-)
+# groqmodel=ChatOpenAI(
+#     model_name="llama3-70b-8192",
+#     openai_api_key=os.getenv("GROQ_API_KEY"),
+#     openai_api_base=os.getenv("GROQ_API_BASE")
+# ).with_fallbacks([model])
+groqmodel= ChatOpenAI(
+    model_name="gpt-4"
+).with_fallbacks([model])
+
+
 
 
 localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
@@ -58,7 +63,7 @@ prompt_en_to_cn = PromptTemplate.from_template("""
     
             {text}
     """)
-en_to_cn = {"text": RunnablePassthrough()} | prompt_en_to_cn | groqmodel | StrOutputParser()
+en_to_cn = {"text": RunnablePassthrough()} | prompt_en_to_cn | groqmodel
 
 
 
@@ -157,7 +162,8 @@ def  build_message(input):
             messages.append(HumanMessage(content))
         else:
             messages.append(AIMessage(content))
-    searchresult= search.invoke(question)
+    searchresult=''
+    # searchresult= search.invoke(question)
     vector= FaissVectorManager(member_openid)
     vector_result=vector.search(question)
     content=""
@@ -169,7 +175,9 @@ def  build_message(input):
 
 # chatchain= build_message|prompt|llm 
 
-chatchain = build_message|prompt|llm|en_to_cn
+# chatchain = build_message|prompt|llm| en_to_cn|StrOutputParser()
+chatchain = build_message|prompt|llm| StrOutputParser()
+
 
 
 

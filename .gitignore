@@ -22,3 +22,5 @@ faiss/*
 files/*
 
 nohup.out
+client/*
+screenshot.png

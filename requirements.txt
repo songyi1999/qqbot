@@ -9,3 +9,5 @@ bs4
 langchain_cohere
 pypdf
 unstructured
+mistune
+selenium

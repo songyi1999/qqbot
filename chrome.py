@@ -28,11 +28,7 @@ def build_image_from_markdown(markdown, screenshot_path):
             padding: 0;
             width: 360px;
         }}
-        img {{
-            max-width: 100%;
-            height: auto;
-            display: block;
-        }}
+      
         </style>
         </head>
         <body>

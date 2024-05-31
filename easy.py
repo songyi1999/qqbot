@@ -1,6 +1,6 @@
 # *_* encoding: utf-8 *_*
 
-# 调用gpt4 实现对话，搜索，画图等各种功能，免除各种意图识别。
+# 调用coze实现对话，搜索，画图等各种功能，免除各种意图识别。
 # 20240520
 import os,re, dotenv,botpy
 from botpy.message import Message,DirectMessage,GroupMessage
@@ -19,12 +19,8 @@ from langchain_core.messages import HumanMessage,AIMessage
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from chrome import build_image_from_markdown
 import requests
-llm= ChatOpenAI(model_name='gpt-4o')
-# llm= ChatOpenAI(
-#      model_name="llama3-70b-8192",
-#     openai_api_key=os.getenv("GROQ_API_KEY"),
-#     openai_api_base=os.getenv("GROQ_API_BASE")
-# )
+llm= ChatOpenAI(model_name='coze.cn')
+
 
 prompt = ChatPromptTemplate.from_messages(    [    MessagesPlaceholder(variable_name="messages"),    ])
 @chain
@@ -81,27 +77,26 @@ class MyClient(botpy.Client):
         db.add(addtime,question,'user')
         content= message_handler(question,member_openid)
         db.add(addtime,content,'ai')
-        pattern = r"\[Image\]\((.*?)\)"
+        pattern = r"\[\w+\]\((.*?)\)"
         match = re.search(pattern, content)
 
         # 如果找到了匹配项，则提取URL
         if match:
             url = match.group(1)
-            requests.post("http://yifus.win/proxy.php",data={"url":url})
-            uploadMedia = await message._api.post_group_file(
-                    group_openid=message.group_openid, 
-                    file_type=1, # 文件类型要对应上，具体支持的类型见方法说明
-                    url= "http://yifus.win/image.jpg"
-                )
+            print("匹配到下载图片网址:"+ url )
+            res=requests.post("http://yifus.win/proxy.php",data={"url":url})
+            imageurl="http://yifus.win/"+res.text
+            print(imageurl)
+            content=""" ![image]({})""".format(imageurl)
             
-        else:
-            sp="client/"+ str(member_openid)+".png"
-            build_image_from_markdown(content,sp)
-            uploadMedia = await message._api.post_group_file(
-                    group_openid=message.group_openid, 
-                    file_type=1, # 文件类型要对应上，具体支持的类型见方法说明
-                    url= "http://fastgpt.xinpanmen.com:8100/"+sp
-                )
+          
+        sp="client/"+ str(member_openid)+".png"
+        build_image_from_markdown(content,sp)
+        uploadMedia = await message._api.post_group_file(
+                group_openid=message.group_openid, 
+                file_type=1, # 文件类型要对应上，具体支持的类型见方法说明
+                url= "http://fastgpt.xinpanmen.com:8100/"+sp
+            )
         await message._api.post_group_message(
                     group_openid=message.group_openid,
                     msg_type=7,  # 7表示富媒体类型

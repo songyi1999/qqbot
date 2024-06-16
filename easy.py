@@ -43,14 +43,10 @@ def  build_message(input):
 
 chatchain = build_message|prompt|llm| StrOutputParser()
 
-def fixquestion(question):
-    question=question.strip()
-    pattern = r"<@!(\d+)>\s*(.*)"
-    match = re.search(pattern, question)
-    if match:
-        user_id = match.group(1)
-        question = match.group(2)
-    return question
+
+
+
+
 
 def message_handler(question:str,member_openid)->str:
         
@@ -71,7 +67,7 @@ def message_handler(question:str,member_openid)->str:
 class MyClient(botpy.Client): 
     async def on_group_at_message_create(self, message: GroupMessage):
         member_openid= message.author.member_openid
-        question = fixquestion(message.content)
+        question = message.content
         db= dbManager(member_openid)
         addtime = int(time.time())
         db.add(addtime,question,'user')
@@ -80,14 +76,14 @@ class MyClient(botpy.Client):
         pattern = r"\[\w+\]\((.*?)\)"
         match = re.search(pattern, content)
 
-        # 如果找到了匹配项，则提取URL
-        if match:
-            url = match.group(1)
-            print("匹配到下载图片网址:"+ url )
-            res=requests.post("http://yifus.win/proxy.php",data={"url":url})
-            imageurl="http://yifus.win/"+res.text
-            print(imageurl)
-            content=""" ![image]({})""".format(imageurl)
+        # # 如果找到了匹配项，则提取URL
+        # if match:
+        #     url = match.group(1)
+        #     print("匹配到下载图片网址:"+ url )
+        #     res=requests.post("http://yifus.win/proxy.php",data={"url":url})
+        #     imageurl="http://yifus.win/"+res.text
+        #     print(imageurl)
+        #     content=""" ![image]({})""".format(imageurl)
             
           
         sp="client/"+ str(member_openid)+".png"

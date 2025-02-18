@@ -25,12 +25,13 @@ def fixquestion(question):
 def message_handler(question:str,member_openid)->str:
         
         content = ""
-        
+        print(question)
 
         if question == "/weather":
             content = "今天天气晴朗，温度适中"
         if question =="/joke":
             content = "笑话：有一天，小明去买菜，结果买了一个西红柿，回家后，他把西红柿放在桌子上，然后西红柿就滚下来了，小明说：西红柿，你别滚，我买单！"
+        print("34",question)
         if not content:
             for i  in  chatchain.stream({"question":question,"member_openid":member_openid}):
                 print(i, end="", flush=True)
@@ -158,14 +159,49 @@ class MyClient(botpy.Client):
 
     # 频道聊天
     async def on_at_message_create(self, message: Message):
-        member_openid= message.author.id
-        content= message_handler(message.content,member_openid)
-        await self.api.post_message(channel_id=message.channel_id, content=content)
+        member_openid = message.author.id
+        question = fixquestion(message.content)  # 获取处理后的问题内容
+        db = dbManager(member_openid)
+        addtime = int(time.time())
+        db.add(addtime, question, 'user')
+        
+        # 检查意图并处理不同类型的请求
+        intent_result = intent.invoke(question)
+        
+        if "file" in intent_result:
+            # 处理文件请求
+            image_url = showcode(member_openid)
+            uploadMedia = await self.api.post_message_file(
+                channel_id=message.channel_id,
+                file_type=1,
+                url=image_url
+            )
+            await message.reply(msg_type=7, media=uploadMedia)
+            return
 
+        if "draw" in intent_result:
+            # 处理绘图请求
+            # ... 绘图相关代码 ...
+            return
+
+        if "weather" in intent_result:
+            # 处理天气请求
+            content = weather_chain.invoke(question)
+        else:
+            # 处理普通对话
+            content = message_handler(question, member_openid)
+
+        print("回答", content)
+        await message.reply(content=f"{content}")
+        
+        # 记录AI回复
+        addtime = int(time.time())
+        db.add(addtime, content, 'ai')
+        db.close()
 
 
 def start_qqbot():
-    intents = botpy.Intents(direct_message=True,public_guild_messages=True,public_messages=True) 
+    intents = botpy.Intents(direct_message=True,public_guild_messages=True,public_messages=True,guilds=True) 
     client = MyClient(intents=intents)
     client.run(appid=os.getenv("QQ_APP_ID")  ,secret=os.getenv("QQ_APP_SECRET"))
 

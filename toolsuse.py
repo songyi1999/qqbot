@@ -66,20 +66,31 @@ show_prompt= ChatPromptTemplate.from_template("""
 
 # 正则表达式获取json
 @chain
-def  get_json( input:str)->str:
+def get_json(input: str) -> str:
     import re
     pattern = re.compile(r'\{[^`]*\}')
     match = pattern.search(input)
-    citydic= { "city":"Shanghai" }
+    citydic = {"city": "Shanghai"}  # 默认值
     if match:
-
-        cityjsonstr= match.group(0)
-        cityjson = json.loads(cityjsonstr)
-        city = cityjson.get("arguments")
-        # 如果不是字符串 ，获取第一个元素
-        if not isinstance(city,str):
-            city = city[0]
-        citydic["city"] = city
+        try:
+            cityjsonstr = match.group(0)
+            cityjson = json.loads(cityjsonstr)
+            city = cityjson.get("arguments")
+            
+            # 处理不同的输入格式情况
+            if isinstance(city, list) and len(city) > 0:
+                city = city[0]  # 如果是列表，取第一个元素
+            elif isinstance(city, dict):
+                city = city.get("city", "Shanghai")  # 如果是字典，尝试获取city键
+            elif isinstance(city, str):
+                city = city  # 如果是字符串，直接使用
+            else:
+                city = "Shanghai"  # 其他情况使用默认值
+                
+            citydic["city"] = city
+        except (json.JSONDecodeError, AttributeError, IndexError) as e:
+            print(f"解析城市数据时出错: {str(e)}")
+            # 发生错误时保持默认值
     return citydic
 
 

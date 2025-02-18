@@ -34,7 +34,7 @@ model= ChatOpenAI(
 #     openai_api_base=os.getenv("GROQ_API_BASE")
 # ).with_fallbacks([model])
 groqmodel= ChatOpenAI(
-    model_name="gpt-4"
+    model_name="glm4"
 ).with_fallbacks([model])
 
 
@@ -45,6 +45,7 @@ localmodel= ChatOpenAI(model_name="qwen:0.5b-chat",
     openai_api_base="http://127.0.0.1:11434/v1"
 )
 
+deepseekmodel= ChatOpenAI(model_name="deepseek-r1:32b")
 
 
 
@@ -132,7 +133,8 @@ prompt = ChatPromptTemplate.from_messages(
                 ***********知识库搜索结果开始***********
                 {content}
                 ***********知识库搜索结果结束***********
-
+                这是当前时间:
+                {now_time}
              """
         ),
         
@@ -170,13 +172,13 @@ def  build_message(input):
     for i in vector_result:
         content += i[0].page_content + "\n"
 
-    return {"content":content,"messages": messages,"memory":memory,"search_data":searchresult}
+    return {"content":content,"messages": messages,"memory":memory,"search_data":searchresult,"now_time":time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())}
 
 
 # chatchain= build_message|prompt|llm 
 
 # chatchain = build_message|prompt|llm| en_to_cn|StrOutputParser()
-chatchain = build_message|prompt|llm| StrOutputParser()
+chatchain = build_message|prompt|deepseekmodel| StrOutputParser()
 
 
 
